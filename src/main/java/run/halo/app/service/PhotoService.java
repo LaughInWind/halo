@@ -79,11 +79,4 @@ public interface PhotoService extends CrudService<Photo, Integer> {
      * @return list of teams
      */
     List<String> listAllTeams();
-
-    /**
-     * Increases photo likes(1).
-     *
-     * @param photoId photo id must not be null
-     */
-    void increaseLike(Integer photoId);
 }

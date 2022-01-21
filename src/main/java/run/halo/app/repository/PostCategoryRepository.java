@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import run.halo.app.model.entity.PostCategory;
 import run.halo.app.model.enums.PostStatus;
+import run.halo.app.model.projection.CategoryPostCountProjection;
 import run.halo.app.repository.base.BaseRepository;
 
 
@@ -111,6 +112,11 @@ public interface PostCategoryRepository extends BaseRepository<PostCategory, Int
      */
     @NonNull
     List<PostCategory> deleteByCategoryId(@NonNull Integer categoryId);
+
+    @Query("select new run.halo.app.model.projection.CategoryPostCountProjection(count(pc.postId)"
+        + ", pc.categoryId) from PostCategory pc group by pc.categoryId")
+    @NonNull
+    List<CategoryPostCountProjection> findPostCount();
 
     /**
      * Finds all post categories by category id list.

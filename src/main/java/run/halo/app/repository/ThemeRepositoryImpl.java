@@ -61,9 +61,7 @@ public class ThemeRepositoryImpl
 
     @Override
     public String getActivatedThemeId() {
-        return this.optionRepository.findByKey(THEME.getValue())
-            .map(Option::getValue)
-            .orElse(DEFAULT_THEME_ID);
+        return getActivatedThemeProperty().getId();
     }
 
     @Override
@@ -74,11 +72,13 @@ public class ThemeRepositoryImpl
             synchronized (this) {
                 if (this.currentTheme == null) {
                     // get current theme id
-                    String currentThemeId = getActivatedThemeId();
+                    String currentThemeId = this.optionRepository.findByKey(THEME.getValue())
+                        .map(Option::getValue)
+                        .orElse(DEFAULT_THEME_ID);
 
                     // fetch current theme
                     this.currentTheme =
-                        this.fetchThemePropertyByThemeId(currentThemeId).orElseGet(() -> {
+                        this.fetchThemeByThemeId(currentThemeId).orElseGet(() -> {
                             if (!StringUtils.equalsIgnoreCase(currentThemeId, DEFAULT_THEME_ID)) {
                                 fallbackTheme.set(true);
                                 return this.getThemeByThemeId(DEFAULT_THEME_ID);
@@ -98,7 +98,7 @@ public class ThemeRepositoryImpl
 
     @Override
     public Optional<ThemeProperty> fetchThemePropertyByThemeId(String themeId) {
-        return listAll()
+        return ThemePropertyScanner.INSTANCE.scan(getThemeRootPath(), null)
             .stream()
             .filter(property -> Objects.equals(themeId, property.getId()))
             .findFirst();
@@ -127,7 +127,7 @@ public class ThemeRepositoryImpl
     @Override
     public ThemeProperty attemptToAdd(ThemeProperty newProperty) {
         // 1. check existence
-        final var alreadyExist = fetchThemePropertyByThemeId(newProperty.getId()).isPresent();
+        final var alreadyExist = fetchThemeByThemeId(newProperty.getId()).isPresent();
         if (alreadyExist) {
             throw new AlreadyExistsException("当前安装的主题已存在");
         }
@@ -206,8 +206,15 @@ public class ThemeRepositoryImpl
 
     @NonNull
     protected ThemeProperty getThemeByThemeId(String themeId) {
-        return fetchThemePropertyByThemeId(themeId).orElseThrow(
+        return fetchThemeByThemeId(themeId).orElseThrow(
             () -> new ThemeNotFoundException("Failed to find theme with id: " + themeId));
     }
 
+    @NonNull
+    protected Optional<ThemeProperty> fetchThemeByThemeId(String themeId) {
+        return ThemePropertyScanner.INSTANCE.scan(getThemeRootPath(), null)
+            .stream()
+            .filter(property -> Objects.equals(themeId, property.getId()))
+            .findFirst();
+    }
 }

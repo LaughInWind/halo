@@ -113,7 +113,7 @@ public class SmmsFileHandler implements FileHandler {
 
         // Check status
         if (mapResponseEntity.getStatusCode().isError()) {
-            log.error("Server response detail: [{}]", mapResponseEntity);
+            log.error("Server response detail: [{}]", mapResponseEntity.toString());
             throw new FileOperationException(
                 "SM.MS 服务状态异常，状态码: " + mapResponseEntity.getStatusCodeValue());
         }

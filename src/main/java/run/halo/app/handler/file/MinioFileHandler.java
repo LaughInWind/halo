@@ -16,14 +16,14 @@ import run.halo.app.model.enums.AttachmentType;
 import run.halo.app.model.properties.MinioProperties;
 import run.halo.app.model.support.HaloConst;
 import run.halo.app.model.support.UploadResult;
-import run.halo.app.repository.AttachmentRepository;
 import run.halo.app.service.OptionService;
+import run.halo.app.utils.FilenameUtils;
+
 
 /**
  * MinIO file handler.
  *
  * @author Wh1te
- * @author guqing
  * @date 2020-10-03
  */
 @Slf4j
@@ -31,12 +31,9 @@ import run.halo.app.service.OptionService;
 public class MinioFileHandler implements FileHandler {
 
     private final OptionService optionService;
-    private final AttachmentRepository attachmentRepository;
 
-    public MinioFileHandler(OptionService optionService,
-        AttachmentRepository attachmentRepository) {
+    public MinioFileHandler(OptionService optionService) {
         this.optionService = optionService;
-        this.attachmentRepository = attachmentRepository;
     }
 
     @NonNull
@@ -65,36 +62,36 @@ public class MinioFileHandler implements FileHandler {
             .build();
 
         try {
-            FilePathDescriptor pathDescriptor = new FilePathDescriptor.Builder()
-                .setBasePath(endpoint + bucketName)
-                .setSubPath(source)
-                .setAutomaticRename(true)
-                .setRenamePredicate(relativePath ->
-                    attachmentRepository
-                        .countByFileKeyAndType(relativePath, AttachmentType.MINIO) > 0)
-                .setOriginalName(file.getOriginalFilename())
-                .build();
+            String basename =
+                FilenameUtils.getBasename(Objects.requireNonNull(file.getOriginalFilename()));
+            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String upFilePath = StringUtils
+                .join(StringUtils.isNotBlank(source) ? source + HaloConst.URL_SEPARATOR : "",
+                    basename, "_", timestamp, ".", extension);
+            String filePath =
+                StringUtils.join(endpoint, bucketName, HaloConst.URL_SEPARATOR, upFilePath);
 
             PutObjectArgs putObjectArgs = PutObjectArgs.builder()
                 .contentType(file.getContentType())
                 .bucket(bucketName)
                 .stream(file.getInputStream(), file.getSize(), -1)
-                .object(pathDescriptor.getRelativePath())
+                .object(upFilePath)
                 .build();
             minioClient.ignoreCertCheck();
             minioClient.putObject(putObjectArgs);
 
             UploadResult uploadResult = new UploadResult();
-            uploadResult.setFilename(pathDescriptor.getName());
-            uploadResult.setFilePath(pathDescriptor.getFullPath());
-            uploadResult.setKey(pathDescriptor.getRelativePath());
+            uploadResult.setFilename(basename);
+            uploadResult.setFilePath(filePath);
+            uploadResult.setKey(upFilePath);
             uploadResult
                 .setMediaType(MediaType.valueOf(Objects.requireNonNull(file.getContentType())));
-            uploadResult.setSuffix(pathDescriptor.getExtension());
+            uploadResult.setSuffix(extension);
             uploadResult.setSize(file.getSize());
 
             // Handle thumbnail
-            handleImageMetadata(file, uploadResult, pathDescriptor::getFullPath);
+            handleImageMetadata(file, uploadResult, () -> filePath);
 
             return uploadResult;
         } catch (Exception e) {

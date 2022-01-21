@@ -3,12 +3,10 @@ package run.halo.app.service;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import run.halo.app.handler.theme.config.support.Group;
-import run.halo.app.handler.theme.config.support.Item;
 import run.halo.app.handler.theme.config.support.ThemeProperty;
 import run.halo.app.model.support.ThemeFile;
 
@@ -16,7 +14,6 @@ import run.halo.app.model.support.ThemeFile;
  * Theme service interface.
  *
  * @author ryanwang
- * @author guqing
  * @date 2019-03-26
  */
 public interface ThemeService {
@@ -70,7 +67,7 @@ public interface ThemeService {
     Optional<ThemeProperty> fetchThemePropertyBy(@Nullable String themeId);
 
     /**
-     * Gets all themes.
+     * Gets all themes
      *
      * @return set of themes
      */
@@ -98,7 +95,7 @@ public interface ThemeService {
     List<String> listCustomTemplates(@NonNull String themeId, @NonNull String prefix);
 
     /**
-     * Judging whether template exists under the specified theme.
+     * Judging whether template exists under the specified theme
      *
      * @param template template must not be blank
      * @return boolean
@@ -106,7 +103,7 @@ public interface ThemeService {
     boolean templateExists(@Nullable String template);
 
     /**
-     * Checks whether theme exists under template path.
+     * Checks whether theme exists under template path
      *
      * @param themeId theme id
      * @return boolean
@@ -171,15 +168,6 @@ public interface ThemeService {
      */
     @NonNull
     List<Group> fetchConfig(@NonNull String themeId);
-
-    /**
-     * Fetch config items by <code>themeId</code> and <code>group</code>.
-     *
-     * @param themeId theme id must not be blank
-     * @param group group name must not be blank
-     * @return config items
-     */
-    Set<Item> fetchConfigItemsBy(@NonNull String themeId, String group);
 
     /**
      * Renders a theme page.

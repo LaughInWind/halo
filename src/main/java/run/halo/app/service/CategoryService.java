@@ -1,6 +1,5 @@
 package run.halo.app.service;
 
-import io.swagger.models.auth.In;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -17,7 +16,6 @@ import run.halo.app.service.base.CrudService;
  *
  * @author johnniang
  * @author ryanwang
- * @author guqing
  * @date 2019-03-14
  */
 @Transactional(readOnly = true)
@@ -33,16 +31,7 @@ public interface CategoryService extends CrudService<Category, Integer> {
     List<CategoryVO> listAsTree(@NonNull Sort sort);
 
     /**
-     * Build category full path.
-     *
-     * @param slug category slug name.
-     * @return full path of category.
-     */
-    @NonNull
-    String buildCategoryFullPath(@NonNull String slug);
-
-    /**
-     * Get category by slug.
+     * Get category by slug
      *
      * @param slug slug
      * @return Category
@@ -100,14 +89,6 @@ public interface CategoryService extends CrudService<Category, Integer> {
      * @return list of category.
      */
     List<Category> listByParentId(@NonNull Integer id);
-
-    /**
-     * List all child categories and current category by parent id.
-     *
-     * @param id parent id.
-     * @return a list of category that contain current id.
-     */
-    List<Category> listAllByParentId(@NonNull Integer id);
 
     /**
      * List all category not encrypt.
@@ -172,12 +153,4 @@ public interface CategoryService extends CrudService<Category, Integer> {
      */
     @NonNull
     Boolean categoryHasEncrypt(Integer categoryId);
-
-    /**
-     * Use <code>categories</code> to build a category tree.
-     *
-     * @param categories categories to build a tree.
-     * @return a tree of category.
-     */
-    List<CategoryVO> listToTree(List<Category> categories);
 }

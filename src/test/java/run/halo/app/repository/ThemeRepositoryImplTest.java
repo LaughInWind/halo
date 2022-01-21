@@ -60,13 +60,13 @@ class ThemeRepositoryImplTest {
 
         given(optionRepository.findByKey(THEME.getValue())).willReturn(Optional.empty());
         doReturn(Optional.of(expectedTheme)).when(themeRepository)
-            .fetchThemePropertyByThemeId(HaloConst.DEFAULT_THEME_ID);
+            .fetchThemeByThemeId(HaloConst.DEFAULT_THEME_ID);
 
         ThemeProperty resultTheme = themeRepository.getActivatedThemeProperty();
         assertEquals(expectedTheme, resultTheme);
 
         verify(optionRepository, times(1)).findByKey(any());
-        verify(themeRepository, times(1)).fetchThemePropertyByThemeId(any());
+        verify(themeRepository, times(1)).fetchThemeByThemeId(any());
     }
 
     @Test
@@ -77,7 +77,7 @@ class ThemeRepositoryImplTest {
 
         given(optionRepository.findByKey(THEME.getValue())).willReturn(Optional.empty());
         doReturn(Optional.of(expectedTheme)).when(themeRepository)
-            .fetchThemePropertyByThemeId(HaloConst.DEFAULT_THEME_ID);
+            .fetchThemeByThemeId(HaloConst.DEFAULT_THEME_ID);
 
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         // define tasks
@@ -96,7 +96,7 @@ class ThemeRepositoryImplTest {
         });
 
         verify(optionRepository, times(1)).findByKey(any());
-        verify(themeRepository, times(1)).fetchThemePropertyByThemeId(any());
+        verify(themeRepository, times(1)).fetchThemeByThemeId(any());
     }
 
 }

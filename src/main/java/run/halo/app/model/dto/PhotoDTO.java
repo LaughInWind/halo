@@ -6,10 +6,7 @@ import run.halo.app.model.dto.base.OutputConverter;
 import run.halo.app.model.entity.Photo;
 
 /**
- * Photo dto.
- *
  * @author ryanwang
- * @author guqing
  * @date 2019-03-21
  */
 @Data
@@ -30,6 +27,4 @@ public class PhotoDTO implements OutputConverter<PhotoDTO, Photo> {
     private String location;
 
     private String description;
-
-    private Long likes;
 }

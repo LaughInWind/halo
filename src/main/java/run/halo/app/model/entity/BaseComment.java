@@ -51,7 +51,7 @@ public class BaseComment extends BaseEntity {
     /**
      * Commentator's email.
      */
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     /**

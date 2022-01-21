@@ -16,13 +16,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -151,7 +149,7 @@ public class PostServiceImpl extends BasePostServiceImpl<Post> implements PostSe
 
         PostQuery postQuery = new PostQuery();
         postQuery.setKeyword(keyword);
-        postQuery.setStatuses(Set.of(PostStatus.PUBLISHED));
+        postQuery.setStatus(PostStatus.PUBLISHED);
 
         // Build specification and find all
         return postRepository.findAll(buildSpecByQuery(postQuery), pageable);
@@ -810,23 +808,18 @@ public class PostServiceImpl extends BasePostServiceImpl<Post> implements PostSe
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new LinkedList<>();
 
-            Set<PostStatus> statuses = postQuery.getStatuses();
-            if (!CollectionUtils.isEmpty(statuses)) {
-                predicates.add(root.get("status").in(statuses));
+            if (postQuery.getStatus() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), postQuery.getStatus()));
             }
 
             if (postQuery.getCategoryId() != null) {
-                List<Integer> categoryIds =
-                    categoryService.listAllByParentId(postQuery.getCategoryId())
-                        .stream()
-                        .map(Category::getId)
-                        .collect(Collectors.toList());
                 Subquery<Post> postSubquery = query.subquery(Post.class);
                 Root<PostCategory> postCategoryRoot = postSubquery.from(PostCategory.class);
                 postSubquery.select(postCategoryRoot.get("postId"));
                 postSubquery.where(
                     criteriaBuilder.equal(root.get("id"), postCategoryRoot.get("postId")),
-                    postCategoryRoot.get("categoryId").in(categoryIds));
+                    criteriaBuilder
+                        .equal(postCategoryRoot.get("categoryId"), postQuery.getCategoryId()));
                 predicates.add(criteriaBuilder.exists(postSubquery));
             }
 
